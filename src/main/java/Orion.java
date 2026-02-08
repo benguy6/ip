@@ -13,7 +13,7 @@ public class Orion {
     private static final String PREFIX_EVENT = "event ";
 
     private static final String HELP_TODO =
-            "Your todo is missing a description.\n"
+            "The description of a todo cannot be empty.\n"
                     + "Try: todo <what to do>\n"
                     + "Example: todo borrow book";
 
@@ -36,17 +36,20 @@ public class Orion {
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String input = scanner.nextLine().trim();
-            boolean shouldContinue = processInput(input);
-            if (!shouldContinue) {
-                break;
+            try {
+                boolean shouldContinue = processInput(input);
+                if (!shouldContinue) {
+                    break;
+                }
+            } catch (OrionException e) {
+                printBoxed("OOPS!!! " + e.getMessage());
             }
         }
     }
 
-    private static boolean processInput(String input) {
+    private static boolean processInput(String input) throws OrionException {
         if (input.isEmpty()) {
-            printBoxed("Please enter a command.");
-            return true;
+            throw new OrionException("Please enter a command.");
         }
 
         if (input.equals(COMMAND_BYE)) {
@@ -73,81 +76,69 @@ public class Orion {
         return true;
     }
 
-    private static void handleAddCommands(String input) {
+    private static void handleAddCommands(String input) throws OrionException {
         if (input.equals("todo")) {
-            printBoxed(HELP_TODO);
-            return;
+            throw new OrionException(HELP_TODO);
         }
 
         if (input.startsWith(PREFIX_TODO)) {
             String desc = input.substring(PREFIX_TODO.length()).trim();
             if (desc.isEmpty()) {
-                printBoxed(HELP_TODO);
-                return;
+                throw new OrionException(HELP_TODO);
             }
             addTask(new Todo(desc));
             return;
         }
 
         if (input.startsWith(PREFIX_DEADLINE)) {
-            Task deadline = parseDeadline(input);
-            if (deadline != null) {
-                addTask(deadline);
-            }
+            addTask(parseDeadline(input));
             return;
         }
 
         if (input.startsWith(PREFIX_EVENT)) {
-            Task event = parseEvent(input);
-            if (event != null) {
-                addTask(event);
-            }
+            addTask(parseEvent(input));
             return;
         }
 
-        printBoxed("I don't understand. Try: todo/deadline/event/list/mark/unmark/bye");
+        // Minimal required: unknown command
+        throw new OrionException("I'm sorry, but I don't know what that means :-(");
     }
 
-    private static Task parseDeadline(String input) {
+    private static Task parseDeadline(String input) throws OrionException {
         String rest = input.substring(PREFIX_DEADLINE.length()).trim();
         String[] parts = rest.split(" /by ", 2);
         if (parts.length < 2) {
-            printBoxed(HELP_DEADLINE);
-            return null;
+            throw new OrionException(HELP_DEADLINE);
         }
 
         String desc = parts[0].trim();
         String by = parts[1].trim();
 
         if (desc.isEmpty() || by.isEmpty()) {
-            printBoxed(HELP_DEADLINE);
-            return null;
+            throw new OrionException(HELP_DEADLINE);
         }
 
         return new Deadline(desc, by);
     }
 
-    private static Task parseEvent(String input) {
+    private static Task parseEvent(String input) throws OrionException {
         String rest = input.substring(PREFIX_EVENT.length()).trim();
         String[] p1 = rest.split(" /from ", 2);
         if (p1.length < 2) {
-            printBoxed(HELP_EVENT);
-            return null;
+            throw new OrionException(HELP_EVENT);
         }
 
         String desc = p1[0].trim();
         String[] p2 = p1[1].split(" /to ", 2);
         if (p2.length < 2) {
-            printBoxed(HELP_EVENT);
-            return null;
+            throw new OrionException(HELP_EVENT);
         }
 
         String from = p2[0].trim();
         String to = p2[1].trim();
 
         if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
-            printBoxed(HELP_EVENT);
-            return null;
+            throw new OrionException(HELP_EVENT);
         }
 
         return new Event(desc, from, to);
@@ -161,10 +152,9 @@ public class Orion {
         System.out.println();
     }
 
-    private static void addTask(Task task) {
+    private static void addTask(Task task) throws OrionException {
         if (taskCount >= MAX_TASKS) {
-            printBoxed("Sorry, I can only store up to " + MAX_TASKS + " tasks.");
-            return;
+            throw new OrionException("Sorry, I can only store up to " + MAX_TASKS + " tasks.");
         }
 
         tasks[taskCount] = task;
@@ -197,18 +187,16 @@ public class Orion {
         System.out.println();
     }
 
-    private static void handleMarkOrUnmark(String input, boolean markAsDone) {
+    private static void handleMarkOrUnmark(String input, boolean markAsDone) throws OrionException {
         Integer taskNumber = parseTaskNumber(input);
         if (taskNumber == null) {
             String example = markAsDone ? "mark 2" : "unmark 2";
-            printBoxed("Please specify a valid task number.\nTry: " + example);
-            return;
+            throw new OrionException("Please specify a valid task number.\nTry: " + example);
         }
 
         int index = taskNumber - 1;
         if (index < 0 || index >= taskCount) {
-            printBoxed("Task number " + taskNumber + " does not exist.");
-            return;
+            throw new OrionException("Task number " + taskNumber + " does not exist.");
         }
 
         Task task = tasks[index];
