@@ -1,9 +1,15 @@
+package orion;
+
+import orion.storage.TaskList;
+import orion.task.Deadline;
+import orion.task.Event;
+import orion.task.Task;
+import orion.task.Todo;
+import orion.ui.Ui;
+
 import java.util.Scanner;
 
 public class Orion {
-    private static final String LINE = "____________________________________________________________";
-    private static final int MAX_TASKS = 100;
-
     private static final String COMMAND_BYE = "bye";
     private static final String COMMAND_LIST = "list";
     private static final String PREFIX_MARK = "mark ";
@@ -27,11 +33,11 @@ public class Orion {
                     + "Try: event <what> /from <start> /to <end>\n"
                     + "Example: event project meeting /from Mon 2pm /to 4pm";
 
-    private static final Task[] tasks = new Task[MAX_TASKS];
-    private static int taskCount = 0;
+    private static final Ui ui = new Ui();
+    private static final TaskList taskList = new TaskList();
 
     public static void main(String[] args) {
-        greet();
+        ui.showWelcome();
 
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
@@ -42,7 +48,7 @@ public class Orion {
                     break;
                 }
             } catch (OrionException e) {
-                printBoxed("OOPS!!! " + e.getMessage());
+                ui.showError(e.getMessage());
             }
         }
     }
@@ -53,12 +59,12 @@ public class Orion {
         }
 
         if (input.equals(COMMAND_BYE)) {
-            printBoxed("Bye. Hope to see you again soon!");
+            ui.showGoodbye();
             return false;
         }
 
         if (input.equals(COMMAND_LIST)) {
-            printList();
+            ui.showList(taskList);
             return true;
         }
 
@@ -100,7 +106,6 @@ public class Orion {
             return;
         }
 
-        // Minimal required: unknown command
         throw new OrionException("I'm sorry, but I don't know what that means :-(");
     }
 
@@ -144,47 +149,13 @@ public class Orion {
         return new Event(desc, from, to);
     }
 
-    private static void greet() {
-        System.out.println(LINE);
-        System.out.println(" Hello! I'm Orion");
-        System.out.println(" What can I do for you?");
-        System.out.println(LINE);
-        System.out.println();
-    }
-
     private static void addTask(Task task) throws OrionException {
-        if (taskCount >= MAX_TASKS) {
-            throw new OrionException("Sorry, I can only store up to " + MAX_TASKS + " tasks.");
+        if (taskList.isFull()) {
+            throw new OrionException("Sorry, I can only store up to 100 tasks.");
         }
 
-        tasks[taskCount] = task;
-        taskCount++;
-
-        System.out.println(LINE);
-        System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
-        System.out.println(LINE);
-        System.out.println();
-    }
-
-    private static void printList() {
-        System.out.println(LINE);
-
-        if (taskCount == 0) {
-            System.out.println(" (no tasks yet)");
-            System.out.println(LINE);
-            System.out.println();
-            return;
-        }
-
-        System.out.println(" Here are the tasks in your list:");
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println(" " + (i + 1) + "." + tasks[i]);
-        }
-
-        System.out.println(LINE);
-        System.out.println();
+        taskList.add(task);
+        ui.showAdded(task, taskList.size());
     }
 
     private static void handleMarkOrUnmark(String input, boolean markAsDone) throws OrionException {
@@ -194,27 +165,18 @@ public class Orion {
             throw new OrionException("Please specify a valid task number.\nTry: " + example);
         }
 
-        int index = taskNumber - 1;
-        if (index < 0 || index >= taskCount) {
+        Task task = taskList.get(taskNumber);
+        if (task == null) {
             throw new OrionException("Task number " + taskNumber + " does not exist.");
         }
 
-        Task task = tasks[index];
         if (markAsDone) {
             task.markDone();
         } else {
             task.markNotDone();
         }
 
-        String header = markAsDone
-                ? "Nice! I've marked this task as done:"
-                : "OK, I've marked this task as not done yet:";
-
-        System.out.println(LINE);
-        System.out.println(" " + header);
-        System.out.println("   " + task);
-        System.out.println(LINE);
-        System.out.println();
+        ui.showMarkResult(markAsDone, task);
     }
 
     private static Integer parseTaskNumber(String input) {
@@ -228,14 +190,5 @@ public class Orion {
         } catch (NumberFormatException e) {
             return null;
         }
-    }
-
-    private static void printBoxed(String message) {
-        System.out.println(LINE);
-        for (String line : message.split("\n")) {
-            System.out.println(" " + line);
-        }
-        System.out.println(LINE);
-        System.out.println();
     }
 }

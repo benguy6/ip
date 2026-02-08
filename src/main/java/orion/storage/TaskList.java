@@ -1,3 +1,7 @@
+package orion.storage;
+
+import orion.task.Task;
+
 public class TaskList {
     private static final int MAX_TASKS = 100;
 
@@ -25,16 +29,7 @@ public class TaskList {
         return tasks[idx];
     }
 
-    public void printAll(Ui ui) {
-        if (size == 0) {
-            ui.printBoxed("(no tasks yet)");
-            return;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Here are the tasks in your list:\n");
-        for (int i = 0; i < size; i++) {
-            sb.append(" ").append(i + 1).append(".").append(tasks[i]).append("\n");
-        }
-        ui.printBoxed(sb.toString().trim());
+    public Task[] getAllTasks() {
+        return tasks;
     }
 }
