@@ -2,34 +2,40 @@ package orion.storage;
 
 import orion.task.Task;
 
-public class TaskList {
-    private static final int MAX_TASKS = 100;
+import java.util.ArrayList;
 
-    private final Task[] tasks = new Task[MAX_TASKS];
-    private int size = 0;
+public class TaskList {
+    private final ArrayList<Task> tasks = new ArrayList<>();
 
     public int size() {
-        return size;
+        return tasks.size();
     }
 
     public boolean isFull() {
-        return size >= MAX_TASKS;
+        return false;
     }
 
     public void add(Task task) {
-        tasks[size] = task;
-        size++;
+        tasks.add(task);
     }
 
     public Task get(int oneBasedIndex) {
         int idx = oneBasedIndex - 1;
-        if (idx < 0 || idx >= size) {
+        if (idx < 0 || idx >= tasks.size()) {
             return null;
         }
-        return tasks[idx];
+        return tasks.get(idx);
     }
 
-    public Task[] getAllTasks() {
+    public Task remove(int oneBasedIndex) {
+        int idx = oneBasedIndex - 1;
+        if (idx < 0 || idx >= tasks.size()) {
+            return null;
+        }
+        return tasks.remove(idx);
+    }
+
+    public ArrayList<Task> getAll() {
         return tasks;
     }
 }
