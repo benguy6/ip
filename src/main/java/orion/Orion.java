@@ -1,6 +1,7 @@
 package orion;
 
 import orion.storage.TaskList;
+import orion.storage.Storage;
 import orion.task.Deadline;
 import orion.task.Event;
 import orion.task.Task;
@@ -35,9 +36,16 @@ public class Orion {
 
     private static final Ui ui = new Ui();
     private static final TaskList taskList = new TaskList();
+    private static final Storage storage = new Storage();
 
     public static void main(String[] args) {
         ui.showWelcome();
+
+        try {
+            taskList.setAll(storage.load());
+        } catch (OrionException e) {
+            ui.showError(e.getMessage());
+        }
 
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
@@ -155,6 +163,7 @@ public class Orion {
         }
 
         taskList.add(task);
+        storage.save(taskList);
         ui.showAdded(task, taskList.size());
     }
 
@@ -175,7 +184,7 @@ public class Orion {
         } else {
             task.markNotDone();
         }
-
+        storage.save(taskList);
         ui.showMarkResult(markAsDone, task);
     }
 
