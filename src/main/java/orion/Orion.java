@@ -17,6 +17,8 @@ public class Orion {
     private static final String PREFIX_TODO = "todo ";
     private static final String PREFIX_DEADLINE = "deadline ";
     private static final String PREFIX_EVENT = "event ";
+    private static final String PREFIX_DELETE = "delete ";
+    private static final String COMMAND_DELETE = "delete";
 
     private static final String HELP_TODO =
             "The description of a todo cannot be empty.\n"
@@ -78,8 +80,31 @@ public class Orion {
             return true;
         }
 
+        if (input.equals(COMMAND_DELETE)) {
+            throw new OrionException("Please specify which task to delete.\nTry: delete 3");
+        }
+
+        if (input.startsWith(PREFIX_DELETE)) {
+            handleDelete(input);
+            return true;
+        }
+
         handleAddCommands(input);
         return true;
+    }
+
+    private static void handleDelete(String input) throws OrionException {
+        Integer taskNumber = parseTaskNumber(input);
+        if (taskNumber == null) {
+            throw new OrionException("Please specify a valid task number.\nTry: delete 3");
+        }
+
+        Task removed = taskList.remove(taskNumber);
+        if (removed == null) {
+            throw new OrionException("Task number " + taskNumber + " does not exist.");
+        }
+
+        ui.showDeleted(removed, taskList.size());
     }
 
     private static void handleAddCommands(String input) throws OrionException {

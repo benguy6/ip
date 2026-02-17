@@ -3,8 +3,19 @@ package orion.ui;
 import orion.storage.TaskList;
 import orion.task.Task;
 
+import java.util.ArrayList;
+
 public class Ui {
     private static final String LINE = "____________________________________________________________";
+
+    public void showDeleted(Task removed, int taskCount) {
+        System.out.println(LINE);
+        System.out.println(" Noted. I've removed this task:");
+        System.out.println("   " + removed);
+        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        System.out.println(LINE);
+        System.out.println();
+    }
 
     public void showList(TaskList taskList) {
         System.out.println(LINE);
@@ -17,9 +28,9 @@ public class Ui {
         }
 
         System.out.println(" Here are the tasks in your list:");
-        Task[] tasks = taskList.getAllTasks();
+        ArrayList<Task> tasks = taskList.getAll();
         for (int i = 0; i < taskList.size(); i++) {
-            System.out.println(" " + (i + 1) + "." + tasks[i]);
+            System.out.println(" " + (i + 1) + "." + tasks.get(i));
         }
 
         System.out.println(LINE);
@@ -47,25 +58,6 @@ public class Ui {
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
         System.out.println(" Now you have " + taskCount + " tasks in the list.");
-        System.out.println(LINE);
-        System.out.println();
-    }
-
-    public void showList(Task[] tasks, int taskCount) {
-        System.out.println(LINE);
-
-        if (taskCount == 0) {
-            System.out.println(" (no tasks yet)");
-            System.out.println(LINE);
-            System.out.println();
-            return;
-        }
-
-        System.out.println(" Here are the tasks in your list:");
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println(" " + (i + 1) + "." + tasks[i]);
-        }
-
         System.out.println(LINE);
         System.out.println();
     }
