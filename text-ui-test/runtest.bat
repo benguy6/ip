@@ -1,10 +1,15 @@
 @ECHO OFF
+setlocal EnableExtensions EnableDelayedExpansion
 
 REM create bin directory if it doesn't exist
 if not exist ..\bin mkdir ..\bin
 
 REM delete output from previous run
-if exist ACTUAL.TXT del ACTUAL.TXT
+if exist ACTUAL-SAVE.TXT del ACTUAL-SAVE.TXT
+if exist ACTUAL-LOAD.TXT del ACTUAL-LOAD.TXT
+
+REM delete saved data so test is repeatable
+if exist ..\data\orion.txt del ..\data\orion.txt
 
 REM compile the code into the bin folder
 (
@@ -19,8 +24,31 @@ IF ERRORLEVEL 1 (
     exit /b 1
 )
 
-REM run the program, feed commands from input.txt and redirect output to ACTUAL.TXT
-java -classpath ..\bin orion.Orion < input.txt > ACTUAL.TXT
+REM RUN 1: create tasks + save to disk
+java -classpath ..\bin orion.Orion < input-save.txt > ACTUAL-SAVE.TXT
+IF ERRORLEVEL 1 (
+    echo ********** RUN 1 FAILED **********
+    exit /b 1
+)
 
-REM compare the output to the expected output
-FC ACTUAL.TXT EXPECTED.TXT
+REM RUN 2: restart app + load from disk + list
+java -classpath ..\bin orion.Orion < input-load.txt > ACTUAL-LOAD.TXT
+IF ERRORLEVEL 1 (
+    echo ********** RUN 2 FAILED **********
+    exit /b 1
+)
+
+REM compare outputs
+FC ACTUAL-SAVE.TXT EXPECTED-SAVE.TXT
+IF ERRORLEVEL 1 (
+    echo ********** SAVE OUTPUT MISMATCH **********
+    exit /b 1
+)
+
+FC ACTUAL-LOAD.TXT EXPECTED-LOAD.TXT
+IF ERRORLEVEL 1 (
+    echo ********** LOAD OUTPUT MISMATCH **********
+    exit /b 1
+)
+
+echo ********** ALL TESTS PASSED **********

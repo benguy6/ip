@@ -19,6 +19,12 @@ public class TaskList {
         tasks.add(task);
     }
 
+    public void setAll(ArrayList<Task> loaded) {
+        tasks.clear();
+        tasks.addAll(loaded);
+    }
+
+
     public Task get(int oneBasedIndex) {
         int idx = oneBasedIndex - 1;
         if (idx < 0 || idx >= tasks.size()) {
@@ -38,4 +44,5 @@ public class TaskList {
     public ArrayList<Task> getAll() {
         return tasks;
     }
+
 }
