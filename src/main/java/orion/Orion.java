@@ -111,7 +111,7 @@ public class Orion {
         if (removed == null) {
             throw new OrionException("Task number " + taskNumber + " does not exist.");
         }
-
+        storage.save(taskList);
         ui.showDeleted(removed, taskList.size());
     }
 
