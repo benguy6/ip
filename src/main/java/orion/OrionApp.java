@@ -85,6 +85,10 @@ public class OrionApp {
                 delete(cmd.index);
                 return true;
 
+            case FIND:
+                ui.showFindResults(taskList.find(cmd.keyword));
+                return true;
+
             default:
                 throw new OrionException("I'm sorry, but I don't know what that means :-(");
         }

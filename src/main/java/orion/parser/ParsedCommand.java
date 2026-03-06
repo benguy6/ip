@@ -62,4 +62,7 @@ public class ParsedCommand {
         return new ParsedCommand(Type.DELETE, null, null, null, null, null, idx);
     }
 
+    public static ParsedCommand find(String keyword) {
+        return new ParsedCommand(Type.FIND, null, null, null, null, keyword, null);
+    }
 }

@@ -1,20 +1,24 @@
 @ECHO OFF
 setlocal EnableExtensions EnableDelayedExpansion
 
-REM create bin directory if it doesn't exist
-if not exist ..\bin mkdir ..\bin
+REM clean bin to avoid stale class files
+if exist ..\bin rmdir /s /q ..\bin
+mkdir ..\bin
 
-REM delete output from previous run
+REM delete outputs from previous run
+if exist ACTUAL.TXT del ACTUAL.TXT
 if exist ACTUAL-SAVE.TXT del ACTUAL-SAVE.TXT
 if exist ACTUAL-LOAD.TXT del ACTUAL-LOAD.TXT
 
-REM delete saved data so test is repeatable
-if exist ..\data\orion.txt del ..\data\orion.txt
+REM reset data so persistence test is repeatable
+if exist ..\data rmdir /s /q ..\data
+if exist data rmdir /s /q data
 
-REM compile the code into the bin folder
+REM compile (include parser!)
 (
   javac -cp ..\src\main\java -Xlint:none -d ..\bin ^
   ..\src\main\java\orion\*.java ^
+  ..\src\main\java\orion\parser\*.java ^
   ..\src\main\java\orion\task\*.java ^
   ..\src\main\java\orion\storage\*.java ^
   ..\src\main\java\orion\ui\*.java
@@ -24,21 +28,33 @@ IF ERRORLEVEL 1 (
     exit /b 1
 )
 
-REM RUN 1: create tasks + save to disk
+REM =========================
+REM TEST 1: Normal behaviour
+REM =========================
+java -classpath ..\bin orion.Orion < input.txt > ACTUAL.TXT
+FC ACTUAL.TXT EXPECTED.TXT
+IF ERRORLEVEL 1 (
+    echo ********** NORMAL TEST MISMATCH **********
+    exit /b 1
+)
+
+REM =========================
+REM TEST 2: Persistence (save/load)
+REM =========================
+if exist ..\data\orion.txt del ..\data\orion.txt
+
 java -classpath ..\bin orion.Orion < input-save.txt > ACTUAL-SAVE.TXT
 IF ERRORLEVEL 1 (
     echo ********** RUN 1 FAILED **********
     exit /b 1
 )
 
-REM RUN 2: restart app + load from disk + list
 java -classpath ..\bin orion.Orion < input-load.txt > ACTUAL-LOAD.TXT
 IF ERRORLEVEL 1 (
     echo ********** RUN 2 FAILED **********
     exit /b 1
 )
 
-REM compare outputs
 FC ACTUAL-SAVE.TXT EXPECTED-SAVE.TXT
 IF ERRORLEVEL 1 (
     echo ********** SAVE OUTPUT MISMATCH **********

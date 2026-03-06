@@ -45,4 +45,16 @@ public class TaskList {
         return tasks;
     }
 
+    public ArrayList<Task> find(String keyword) {
+        ArrayList<Task> matches = new ArrayList<>();
+        String k = keyword.toLowerCase();
+
+        for (Task t : tasks) {
+            if (t.getDescription().toLowerCase().contains(k)) {
+                matches.add(t);
+            }
+        }
+        return matches;
+    }
+
 }

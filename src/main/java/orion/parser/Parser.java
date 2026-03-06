@@ -75,6 +75,18 @@ public class Parser {
             return parseEvent(trimmed);
         }
 
+        if (trimmed.equals("find")) {
+            throw new OrionException("Please provide a keyword.\nTry: find book");
+        }
+
+        if (trimmed.startsWith("find ")) {
+            String keyword = trimmed.substring(5).trim();
+            if (keyword.isEmpty()) {
+                throw new OrionException("Please provide a keyword.\nTry: find book");
+            }
+            return ParsedCommand.find(keyword);
+        }
+
         throw new OrionException("I'm sorry, but I don't know what that means :-(");
     }
 
