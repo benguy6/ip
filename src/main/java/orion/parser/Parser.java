@@ -1,6 +1,13 @@
+/**
+ * Parses raw user input into {@link ParsedCommand} objects.
+ * Validates command formats and throws {@link orion.OrionException} for invalid inputs.
+ */
+
 package orion.parser;
 
 import orion.OrionException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class Parser {
 
@@ -73,7 +80,6 @@ public class Parser {
             return parseEvent(trimmed);
         }
 
-        // Optional for Level-9 later (safe to include now)
         if (trimmed.equals("find")) {
             throw new OrionException("Please provide a keyword.\nTry: find book");
         }
@@ -90,7 +96,7 @@ public class Parser {
     }
 
     private ParsedCommand parseDeadline(String input) throws OrionException {
-        String rest = input.substring(9).trim(); // after "deadline "
+        String rest = input.substring(9).trim();
         String[] parts = rest.split(" /by ", 2);
         if (parts.length < 2) {
             throw new OrionException(HELP_DEADLINE);
@@ -102,7 +108,14 @@ public class Parser {
             throw new OrionException(HELP_DEADLINE);
         }
 
-        return ParsedCommand.deadline(desc, by);
+        LocalDate byDate;
+        try {
+            byDate = LocalDate.parse(by);
+        } catch (DateTimeParseException e) {
+            throw new OrionException("Please use yyyy-mm-dd for dates.\nExample: deadline return book /by 2019-10-15");
+        }
+
+        return ParsedCommand.deadline(desc, byDate);
     }
 
     private ParsedCommand parseEvent(String input) throws OrionException {

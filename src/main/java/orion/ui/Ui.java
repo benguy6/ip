@@ -1,3 +1,8 @@
+/**
+ * Handles all user-facing input/output formatting for the Orion chatbot.
+ * Responsible for printing messages such as greetings, errors, task lists, and updates.
+ */
+
 package orion.ui;
 
 import orion.storage.TaskList;
@@ -70,6 +75,25 @@ public class Ui {
         System.out.println(LINE);
         System.out.println(" " + header);
         System.out.println("   " + task);
+        System.out.println(LINE);
+        System.out.println();
+    }
+
+    public void showFindResults(ArrayList<Task> matches) {
+        System.out.println(LINE);
+
+        if (matches.isEmpty()) {
+            System.out.println(" No matching tasks found.");
+            System.out.println(LINE);
+            System.out.println();
+            return;
+        }
+
+        System.out.println(" Here are the matching tasks in your list:");
+        for (int i = 0; i < matches.size(); i++) {
+            System.out.println(" " + (i + 1) + "." + matches.get(i));
+        }
+
         System.out.println(LINE);
         System.out.println();
     }

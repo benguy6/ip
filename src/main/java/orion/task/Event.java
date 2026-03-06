@@ -1,3 +1,8 @@
+/**
+ * Represents a task that occurs within a start and end time range.
+ * At this stage, event times may be stored as strings (unless upgraded in later levels).
+ */
+
 package orion.task;
 
 public class Event extends Task {

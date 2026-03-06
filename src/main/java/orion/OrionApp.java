@@ -1,3 +1,9 @@
+/**
+ * Runs the Orion chatbot application.
+ * Coordinates user interaction (Ui), task management (TaskList), persistence (Storage),
+ * and command parsing (Parser).
+ */
+
 package orion;
 
 import orion.parser.Parser;
@@ -86,8 +92,8 @@ public class OrionApp {
                 return true;
 
             case FIND:
-                // Level-9 later; keep parser ready without breaking compile
-                throw new OrionException("Find not implemented yet.");
+                ui.showFindResults(taskList.find(cmd.keyword));
+                return true;
 
             default:
                 throw new OrionException("I'm sorry, but I don't know what that means :-(");

@@ -1,3 +1,8 @@
+/**
+ * Stores and manages the in-memory list of tasks.
+ * Provides operations such as add, delete, retrieve, and search.
+ */
+
 package orion.storage;
 
 import orion.task.Task;
@@ -43,6 +48,18 @@ public class TaskList {
 
     public ArrayList<Task> getAll() {
         return tasks;
+    }
+
+    public ArrayList<Task> find(String keyword) {
+        ArrayList<Task> matches = new ArrayList<>();
+        String k = keyword.toLowerCase();
+
+        for (Task t : tasks) {
+            if (t.getDescription().toLowerCase().contains(k)) {
+                matches.add(t);
+            }
+        }
+        return matches;
     }
 
 }

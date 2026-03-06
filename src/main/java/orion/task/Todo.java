@@ -1,3 +1,7 @@
+/**
+ * Represents a task without any associated date/time.
+ */
+
 package orion.task;
 
 public class Todo extends Task {
