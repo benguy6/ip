@@ -1,5 +1,7 @@
 package orion;
 
+import orion.parser.Parser;
+import orion.parser.ParsedCommand;
 import orion.storage.Storage;
 import orion.storage.TaskList;
 import orion.task.Deadline;
@@ -11,39 +13,17 @@ import orion.ui.Ui;
 import java.util.Scanner;
 
 public class OrionApp {
-    private static final String COMMAND_BYE = "bye";
-    private static final String COMMAND_LIST = "list";
-    private static final String PREFIX_MARK = "mark ";
-    private static final String PREFIX_UNMARK = "unmark ";
-    private static final String PREFIX_TODO = "todo ";
-    private static final String PREFIX_DEADLINE = "deadline ";
-    private static final String PREFIX_EVENT = "event ";
-    private static final String PREFIX_DELETE = "delete ";
-    private static final String COMMAND_DELETE = "delete";
-
-    private static final String HELP_TODO =
-            "The description of a todo cannot be empty.\n"
-                    + "Try: todo <what to do>\n"
-                    + "Example: todo borrow book";
-
-    private static final String HELP_DEADLINE =
-            "Your deadline format looks wrong.\n"
-                    + "Try: deadline <what to do> /by <when>\n"
-                    + "Example: deadline return book /by Sunday";
-
-    private static final String HELP_EVENT =
-            "Your event format looks wrong.\n"
-                    + "Try: event <what> /from <start> /to <end>\n"
-                    + "Example: event project meeting /from Mon 2pm /to 4pm";
 
     private final Ui ui;
     private final TaskList taskList;
     private final Storage storage;
+    private final Parser parser;
 
     public OrionApp() {
         ui = new Ui();
         taskList = new TaskList();
         storage = new Storage();
+        parser = new Parser();
 
         try {
             taskList.setAll(storage.load());
@@ -57,9 +37,11 @@ public class OrionApp {
 
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
-            String input = scanner.nextLine().trim();
+            String input = scanner.nextLine();
+
             try {
-                boolean shouldContinue = processInput(input);
+                ParsedCommand cmd = parser.parse(input);
+                boolean shouldContinue = execute(cmd);
                 if (!shouldContinue) {
                     break;
                 }
@@ -69,124 +51,47 @@ public class OrionApp {
         }
     }
 
-    private boolean processInput(String input) throws OrionException {
-        if (input.isEmpty()) {
-            throw new OrionException("Please enter a command.");
+    private boolean execute(ParsedCommand cmd) throws OrionException {
+        switch (cmd.type) {
+            case BYE:
+                ui.showGoodbye();
+                return false;
+
+            case LIST:
+                ui.showList(taskList);
+                return true;
+
+            case TODO:
+                addTask(new Todo(cmd.description));
+                return true;
+
+            case DEADLINE:
+                addTask(new Deadline(cmd.description, cmd.by));
+                return true;
+
+            case EVENT:
+                addTask(new Event(cmd.description, cmd.from, cmd.to));
+                return true;
+
+            case MARK:
+                mark(cmd.index, true);
+                return true;
+
+            case UNMARK:
+                mark(cmd.index, false);
+                return true;
+
+            case DELETE:
+                delete(cmd.index);
+                return true;
+
+            case FIND:
+                // Level-9 later; keep parser ready without breaking compile
+                throw new OrionException("Find not implemented yet.");
+
+            default:
+                throw new OrionException("I'm sorry, but I don't know what that means :-(");
         }
-
-        if (input.equals(COMMAND_BYE)) {
-            ui.showGoodbye();
-            return false;
-        }
-
-        if (input.equals(COMMAND_LIST)) {
-            ui.showList(taskList);
-            return true;
-        }
-
-        if (input.startsWith(PREFIX_MARK)) {
-            handleMarkOrUnmark(input, true);
-            return true;
-        }
-
-        if (input.startsWith(PREFIX_UNMARK)) {
-            handleMarkOrUnmark(input, false);
-            return true;
-        }
-
-        if (input.equals(COMMAND_DELETE)) {
-            throw new OrionException("Please specify which task to delete.\nTry: delete 3");
-        }
-
-        if (input.startsWith(PREFIX_DELETE)) {
-            handleDelete(input);
-            return true;
-        }
-
-        handleAddCommands(input);
-        return true;
-    }
-
-    private void handleDelete(String input) throws OrionException {
-        Integer taskNumber = parseTaskNumber(input);
-        if (taskNumber == null) {
-            throw new OrionException("Please specify a valid task number.\nTry: delete 3");
-        }
-
-        Task removed = taskList.remove(taskNumber);
-        if (removed == null) {
-            throw new OrionException("Task number " + taskNumber + " does not exist.");
-        }
-
-        storage.save(taskList);
-        ui.showDeleted(removed, taskList.size());
-    }
-
-    private void handleAddCommands(String input) throws OrionException {
-        if (input.equals("todo")) {
-            throw new OrionException(HELP_TODO);
-        }
-
-        if (input.startsWith(PREFIX_TODO)) {
-            String desc = input.substring(PREFIX_TODO.length()).trim();
-            if (desc.isEmpty()) {
-                throw new OrionException(HELP_TODO);
-            }
-            addTask(new Todo(desc));
-            return;
-        }
-
-        if (input.startsWith(PREFIX_DEADLINE)) {
-            addTask(parseDeadline(input));
-            return;
-        }
-
-        if (input.startsWith(PREFIX_EVENT)) {
-            addTask(parseEvent(input));
-            return;
-        }
-
-        throw new OrionException("I'm sorry, but I don't know what that means :-(");
-    }
-
-    private Task parseDeadline(String input) throws OrionException {
-        String rest = input.substring(PREFIX_DEADLINE.length()).trim();
-        String[] parts = rest.split(" /by ", 2);
-        if (parts.length < 2) {
-            throw new OrionException(HELP_DEADLINE);
-        }
-
-        String desc = parts[0].trim();
-        String by = parts[1].trim();
-
-        if (desc.isEmpty() || by.isEmpty()) {
-            throw new OrionException(HELP_DEADLINE);
-        }
-
-        return new Deadline(desc, by);
-    }
-
-    private Task parseEvent(String input) throws OrionException {
-        String rest = input.substring(PREFIX_EVENT.length()).trim();
-        String[] p1 = rest.split(" /from ", 2);
-        if (p1.length < 2) {
-            throw new OrionException(HELP_EVENT);
-        }
-
-        String desc = p1[0].trim();
-        String[] p2 = p1[1].split(" /to ", 2);
-        if (p2.length < 2) {
-            throw new OrionException(HELP_EVENT);
-        }
-
-        String from = p2[0].trim();
-        String to = p2[1].trim();
-
-        if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
-            throw new OrionException(HELP_EVENT);
-        }
-
-        return new Event(desc, from, to);
     }
 
     private void addTask(Task task) throws OrionException {
@@ -199,16 +104,20 @@ public class OrionApp {
         ui.showAdded(task, taskList.size());
     }
 
-    private void handleMarkOrUnmark(String input, boolean markAsDone) throws OrionException {
-        Integer taskNumber = parseTaskNumber(input);
-        if (taskNumber == null) {
-            String example = markAsDone ? "mark 2" : "unmark 2";
-            throw new OrionException("Please specify a valid task number.\nTry: " + example);
+    private void delete(int oneBasedIndex) throws OrionException {
+        Task removed = taskList.remove(oneBasedIndex);
+        if (removed == null) {
+            throw new OrionException("Task number " + oneBasedIndex + " does not exist.");
         }
 
-        Task task = taskList.get(taskNumber);
+        storage.save(taskList);
+        ui.showDeleted(removed, taskList.size());
+    }
+
+    private void mark(int oneBasedIndex, boolean markAsDone) throws OrionException {
+        Task task = taskList.get(oneBasedIndex);
         if (task == null) {
-            throw new OrionException("Task number " + taskNumber + " does not exist.");
+            throw new OrionException("Task number " + oneBasedIndex + " does not exist.");
         }
 
         if (markAsDone) {
@@ -219,18 +128,5 @@ public class OrionApp {
 
         storage.save(taskList);
         ui.showMarkResult(markAsDone, task);
-    }
-
-    private Integer parseTaskNumber(String input) {
-        String[] parts = input.split("\\s+");
-        if (parts.length != 2) {
-            return null;
-        }
-
-        try {
-            return Integer.parseInt(parts[1]);
-        } catch (NumberFormatException e) {
-            return null;
-        }
     }
 }
