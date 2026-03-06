@@ -1,3 +1,8 @@
+/**
+ * Represents a parsed user command produced by {@link Parser}.
+ * Stores the command type and any associated arguments (e.g., index, description, dates).
+ */
+
 package orion.parser;
 
 import java.time.LocalDate;

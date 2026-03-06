@@ -1,3 +1,8 @@
+/**
+ * Parses raw user input into {@link ParsedCommand} objects.
+ * Validates command formats and throws {@link orion.OrionException} for invalid inputs.
+ */
+
 package orion.parser;
 
 import orion.OrionException;

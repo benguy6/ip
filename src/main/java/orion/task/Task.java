@@ -1,3 +1,8 @@
+/**
+ * Represents a generic task with a description and completion status.
+ * Subclasses specify additional fields such as deadlines or event times.
+ */
+
 package orion.task;
 
 public class Task {

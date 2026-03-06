@@ -1,3 +1,8 @@
+/**
+ * Handles all user-facing input/output formatting for the Orion chatbot.
+ * Responsible for printing messages such as greetings, errors, task lists, and updates.
+ */
+
 package orion.ui;
 
 import orion.storage.TaskList;

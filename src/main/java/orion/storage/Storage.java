@@ -1,3 +1,8 @@
+/**
+ * Handles loading tasks from disk and saving tasks to disk.
+ * Uses a human-editable text format stored at a relative path (e.g., data/orion.txt).
+ */
+
 package orion.storage;
 
 import orion.OrionException;

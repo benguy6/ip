@@ -1,3 +1,7 @@
+/**
+ * Entry point for the Orion chatbot.
+ */
+
 package orion;
 
 public class Orion {

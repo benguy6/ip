@@ -1,3 +1,7 @@
+/**
+ * Represents a task that must be completed by a specific date.
+ */
+
 package orion.task;
 
 import java.time.LocalDate;

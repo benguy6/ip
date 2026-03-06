@@ -1,3 +1,9 @@
+/**
+ * Runs the Orion chatbot application.
+ * Coordinates user interaction (Ui), task management (TaskList), persistence (Storage),
+ * and command parsing (Parser).
+ */
+
 package orion;
 
 import orion.parser.Parser;

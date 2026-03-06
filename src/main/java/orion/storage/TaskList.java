@@ -1,3 +1,8 @@
+/**
+ * Stores and manages the in-memory list of tasks.
+ * Provides operations such as add, delete, retrieve, and search.
+ */
+
 package orion.storage;
 
 import orion.task.Task;
