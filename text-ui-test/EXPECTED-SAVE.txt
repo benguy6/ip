@@ -10,15 +10,14 @@ ____________________________________________________________
 ____________________________________________________________
 
 ____________________________________________________________
- Got it. I've added this task:
-   [D][ ] return book (by: Sunday)
- Now you have 2 tasks in the list.
+ OOPS!!! Please use yyyy-mm-dd for dates.
+ Example: deadline return book /by 2019-10-15
 ____________________________________________________________
 
 ____________________________________________________________
  Got it. I've added this task:
    [E][ ] project meeting (from: Mon 2pm to: 4pm)
- Now you have 3 tasks in the list.
+ Now you have 2 tasks in the list.
 ____________________________________________________________
 
 ____________________________________________________________

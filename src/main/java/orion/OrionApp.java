@@ -85,10 +85,6 @@ public class OrionApp {
                 delete(cmd.index);
                 return true;
 
-            case FIND:
-                // Level-9 later; keep parser ready without breaking compile
-                throw new OrionException("Find not implemented yet.");
-
             default:
                 throw new OrionException("I'm sorry, but I don't know what that means :-(");
         }

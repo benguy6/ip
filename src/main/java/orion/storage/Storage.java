@@ -11,6 +11,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class Storage {
     private static final String DATA_DIR = "data";
@@ -47,9 +49,8 @@ public class Storage {
         ensureDataDirExists();
 
         try (FileWriter fw = new FileWriter(FILE_PATH)) {
-            Task[] tasks = taskList.getAll().toArray(new Task[0]);
-            for (int i = 0; i < taskList.size(); i++) {
-                fw.write(encodeTask(tasks[i]));
+            for (Task task : taskList.getAll()) {
+                fw.write(encodeTask(task));
                 fw.write(System.lineSeparator());
             }
         } catch (IOException e) {
@@ -84,7 +85,12 @@ public class Storage {
                 break;
             case "D":
                 if (p.length < 4) return null;
-                t = new Deadline(desc, p[3]);
+                try {
+                    LocalDate byDate = LocalDate.parse(p[3]);
+                    t = new Deadline(desc, byDate);
+                } catch (DateTimeParseException ex) {
+                    return null;
+                }
                 break;
             case "E":
                 if (p.length < 5) return null;
@@ -108,7 +114,7 @@ public class Storage {
         }
         if (t instanceof Deadline) {
             Deadline d = (Deadline) t;
-            return "D | " + done + " | " + d.getDescription() + " | " + d.getBy();
+            return "D | " + done + " | " + d.getDescription() + " | " + d.getBy().toString();
         }
         if (t instanceof Event) {
             Event e = (Event) t;
